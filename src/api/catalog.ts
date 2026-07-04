@@ -7,14 +7,21 @@ export type BrandFilters = {
   search?: string;
 };
 
+export type ServiceTypeOption = { id?: number; value: string; label: string; image?: string | null };
+export type CityOption = { value: string; label: string };
+
 export async function getOffers(filters: { city?: string; service_type?: string } = {}) {
   const { data } = await apiClient.get<{ offers: PackageOffer[] }>('/offers', { params: filters });
   return data.offers;
 }
 
 export async function getBrands(filters: BrandFilters = {}) {
-  const { data } = await apiClient.get<{ brands: Paginated<Brand> }>('/brands', { params: filters });
-  return data.brands;
+  const { data } = await apiClient.get<{
+    brands: Paginated<Brand>;
+    serviceTypes: ServiceTypeOption[];
+    cities: CityOption[];
+  }>('/brands', { params: filters });
+  return data;
 }
 
 export async function getBrand(slug: string) {

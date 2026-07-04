@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
@@ -11,6 +12,7 @@ import {
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { apiErrorMessage } from '@/api/client';
+import { ArabicFonts, CairoFonts } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -59,7 +61,12 @@ export default function LoginScreen() {
     setIsSubmitting(true);
     try {
       await verifyOtp(phone.trim(), code.trim(), needsName ? name.trim() : undefined);
-      // بعد نجاح verifyOtp، الـ layout الجذري سيحوّلنا تلقائياً للتطبيق الرئيسي.
+      // نرجع للشاشة اللي جينا منها (لو وصلنا هنا بدفع فوق شاشة ثانية)، وإلا نروح للرئيسية.
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace('/(tabs)');
+      }
     } catch (err) {
       setError(apiErrorMessage(err));
     } finally {
@@ -72,7 +79,7 @@ export default function LoginScreen() {
       style={{ flex: 1 }}
       behavior={Platform.select({ ios: 'padding', default: undefined })}>
       <ThemedView style={styles.container}>
-        <ThemedText type="title" style={styles.title}>
+        <ThemedText type="title" style={[styles.title, { color: theme.primary, fontFamily: CairoFonts.bold }]}>
           فود‌ستيشن
         </ThemedText>
         <ThemedText themeColor="textSecondary" style={styles.subtitle}>
@@ -81,7 +88,7 @@ export default function LoginScreen() {
 
         {step === 'phone' ? (
           <TextInput
-            style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+            style={[styles.input, { color: theme.text, borderColor: theme.primary }]}
             placeholder="05xxxxxxxx"
             placeholderTextColor={theme.textSecondary}
             keyboardType="phone-pad"
@@ -93,7 +100,7 @@ export default function LoginScreen() {
         ) : (
           <>
             <TextInput
-              style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+              style={[styles.input, { color: theme.text, borderColor: theme.primary }]}
               placeholder="رمز التحقق"
               placeholderTextColor={theme.textSecondary}
               keyboardType="number-pad"
@@ -104,7 +111,7 @@ export default function LoginScreen() {
             />
             {needsName ? (
               <TextInput
-                style={[styles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
+                style={[styles.input, { color: theme.text, borderColor: theme.primary }]}
                 placeholder="الاسم الكامل"
                 placeholderTextColor={theme.textSecondary}
                 value={name}
@@ -116,19 +123,19 @@ export default function LoginScreen() {
         )}
 
         {error ? (
-          <ThemedText themeColor="text" style={styles.error}>
+          <ThemedText themeColor="danger" style={styles.error}>
             {error}
           </ThemedText>
         ) : null}
 
         <Pressable
-          style={[styles.button, { backgroundColor: theme.text, opacity: isSubmitting ? 0.6 : 1 }]}
+          style={[styles.button, { backgroundColor: theme.primary, opacity: isSubmitting ? 0.6 : 1 }]}
           disabled={isSubmitting}
           onPress={step === 'phone' ? handleRequestOtp : handleVerifyOtp}>
           {isSubmitting ? (
             <ActivityIndicator color={theme.background} />
           ) : (
-            <ThemedText style={{ color: theme.background, fontWeight: '700' }}>
+            <ThemedText style={{ color: theme.background, fontFamily: ArabicFonts.bold }}>
               {step === 'phone' ? 'إرسال الرمز' : 'تأكيد الدخول'}
             </ThemedText>
           )}

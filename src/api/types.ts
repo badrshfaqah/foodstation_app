@@ -19,12 +19,17 @@ export type Package = {
   persons_count: number;
   max_persons: number | null;
   allow_extra_persons: boolean;
+  extra_person_price: number | null;
   allow_extra_hours: boolean;
   extra_hour_price: number | null;
+  max_extra_hours: number | null;
   duration_hours: number;
+  min_booking_hours: number;
   service_type: string | null;
-  requirements: string | null;
+  requirements: string[] | null;
   includes: string[] | null;
+  selection_groups: { label: string; min: number; max: number; options: string[] }[] | null;
+  optional_addons: { name: string; price: number; pricing: 'fixed' | 'per_person' }[] | null;
   is_active: boolean;
   sort_order: number;
 };
@@ -36,8 +41,11 @@ export type Brand = {
   slug: string;
   description: string | null;
   service_type: string | null;
+  service_types?: string[] | null;
   city: string;
+  cities?: string[] | null;
   logo: string | null;
+  cover: string | null;
   images: string[] | null;
   rating: number;
   reviews_count: number;
@@ -45,8 +53,11 @@ export type Brand = {
   is_featured: boolean;
   is_available: boolean;
   effective_available?: boolean;
+  weekly_off_days?: number[] | null;
+  working_hours_start?: string;
+  working_hours_end?: string;
   packages?: Package[];
-  activePackages?: Package[];
+  active_packages?: Package[];
 };
 
 export type PackageOffer = {

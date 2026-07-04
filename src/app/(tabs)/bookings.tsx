@@ -7,6 +7,9 @@ import { apiErrorMessage } from '@/api/client';
 import type { Booking, BookingStatus } from '@/api/types';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { LoginPrompt } from '@/components/login-prompt';
+import { CardShadow } from '@/constants/theme';
+import { useAuth } from '@/context/auth-context';
 import { useTheme } from '@/hooks/use-theme';
 
 const STATUS_LABELS: Record<BookingStatus, string> = {
@@ -18,9 +21,17 @@ const STATUS_LABELS: Record<BookingStatus, string> = {
   completed: 'مكتمل',
 };
 
+const STATUS_COLOR: Partial<Record<BookingStatus, 'success' | 'danger'>> = {
+  accepted: 'success',
+  completed: 'success',
+  rejected: 'danger',
+  cancelled: 'danger',
+};
+
 export default function BookingsScreen() {
   const theme = useTheme();
   const router = useRouter();
+  const { user } = useAuth();
 
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -39,9 +50,10 @@ export default function BookingsScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      if (!user) return;
       setIsLoading(true);
       load().finally(() => setIsLoading(false));
-    }, [load])
+    }, [load, user])
   );
 
   const onRefresh = useCallback(async () => {
@@ -50,16 +62,24 @@ export default function BookingsScreen() {
     setIsRefreshing(false);
   }, [load]);
 
+  if (!user) {
+    return (
+      <ThemedView type="backgroundElement" style={{ flex: 1 }}>
+        <LoginPrompt message="سجّل دخولك لعرض حجوزاتك" />
+      </ThemedView>
+    );
+  }
+
   if (isLoading) {
     return (
-      <ThemedView style={styles.center}>
-        <ActivityIndicator color={theme.text} />
+      <ThemedView type="backgroundElement" style={styles.center}>
+        <ActivityIndicator color={theme.primary} />
       </ThemedView>
     );
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView type="backgroundElement" style={styles.container}>
       <FlatList
         data={bookings}
         keyExtractor={(item) => String(item.id)}
@@ -70,7 +90,11 @@ export default function BookingsScreen() {
             <ThemedText type="title" style={styles.title}>
               حجوزاتي
             </ThemedText>
-            {error ? <ThemedText style={styles.error}>{error}</ThemedText> : null}
+            {error ? (
+              <ThemedText themeColor="danger" style={styles.error}>
+                {error}
+              </ThemedText>
+            ) : null}
           </>
         }
         ListEmptyComponent={
@@ -81,18 +105,20 @@ export default function BookingsScreen() {
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         renderItem={({ item }) => (
           <Pressable
-            style={[styles.card, { backgroundColor: theme.backgroundElement }]}
+            style={[styles.card, CardShadow, { backgroundColor: theme.background }]}
             onPress={() => router.push({ pathname: '/booking-detail/[id]', params: { id: String(item.id) } })}>
             <View style={styles.cardHeader}>
               <ThemedText type="smallBold">{item.brand?.name}</ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
+              <ThemedText type="small" themeColor={STATUS_COLOR[item.status] ?? 'textSecondary'}>
                 {STATUS_LABELS[item.status]}
               </ThemedText>
             </View>
             <ThemedText type="small" themeColor="textSecondary">
-              {item.package?.name} · {item.event_date}
+              {item.package?.name} · {item.event_date.slice(0, 10)}
             </ThemedText>
-            <ThemedText type="smallBold">{item.total_amount} ر.س</ThemedText>
+            <ThemedText type="smallBold" themeColor="accent">
+              {item.total_amount} ر.س
+            </ThemedText>
           </Pressable>
         )}
       />
@@ -103,9 +129,9 @@ export default function BookingsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  listContent: { paddingHorizontal: 16, paddingBottom: 32 },
+  listContent: { paddingHorizontal: 16, paddingBottom: 110 },
   title: { fontSize: 28, textAlign: 'right', marginTop: 8, marginBottom: 16 },
-  error: { color: '#d32f2f', textAlign: 'center', marginBottom: 8 },
+  error: { textAlign: 'center', marginBottom: 8 },
   empty: { textAlign: 'center', marginTop: 48 },
   card: { borderRadius: 16, padding: 16, gap: 6, alignItems: 'flex-end' },
   cardHeader: { flexDirection: 'row-reverse', justifyContent: 'space-between', width: '100%' },
