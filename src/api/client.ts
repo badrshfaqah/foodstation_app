@@ -9,6 +9,7 @@ const TOKEN_KEY = 'foodstation_token';
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: { Accept: 'application/json' },
+  timeout: 15000,
 });
 
 apiClient.interceptors.request.use(async (config) => {

@@ -4,6 +4,9 @@ import { Platform, View, type ColorValue } from 'react-native';
 
 import { CardShadow } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { haptics } from '@/utils/haptics';
+
+const onTabPress = () => haptics.select();
 
 function TabIcon({
   name,
@@ -62,6 +65,7 @@ export default function TabsLayout() {
           title: 'الرئيسية',
           tabBarIcon: ({ color, focused }) => <TabIcon name="home" focused={focused} color={color} />,
         }}
+        listeners={{ tabPress: onTabPress }}
       />
       <Tabs.Screen
         name="search"
@@ -69,6 +73,7 @@ export default function TabsLayout() {
           title: 'بحث',
           tabBarIcon: ({ color, focused }) => <TabIcon name="search" focused={focused} color={color} />,
         }}
+        listeners={{ tabPress: onTabPress }}
       />
       <Tabs.Screen
         name="bookings"
@@ -76,6 +81,7 @@ export default function TabsLayout() {
           title: 'حجوزاتي',
           tabBarIcon: ({ color, focused }) => <TabIcon name="calendar" focused={focused} color={color} />,
         }}
+        listeners={{ tabPress: onTabPress }}
       />
       <Tabs.Screen
         name="profile"
@@ -83,6 +89,7 @@ export default function TabsLayout() {
           title: 'حسابي',
           tabBarIcon: ({ color, focused }) => <TabIcon name="person" focused={focused} color={color} />,
         }}
+        listeners={{ tabPress: onTabPress }}
       />
     </Tabs>
   );

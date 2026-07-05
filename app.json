@@ -7,7 +7,17 @@
     "icon": "./assets/images/icon.png",
     "scheme": "foodstationapp",
     "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "sa.foodstation.app",
+      "buildNumber": "1",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "نستخدم Face ID لفتح التطبيق بسرعة بدل إدخال رمز التحقق في كل مرة."
+      }
+    },
     "android": {
+      "package": "sa.foodstation.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
         "foregroundImage": "./assets/images/android-icon-foreground.png"
@@ -29,7 +39,14 @@
         }
       ],
       "expo-secure-store",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/android-icon-foreground.png",
+          "color": "#E8490F"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

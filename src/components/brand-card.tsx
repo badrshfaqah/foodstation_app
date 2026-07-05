@@ -8,6 +8,7 @@ import type { Brand } from '@/api/types';
 import { storageUrl } from '@/config';
 import { useSaved } from '@/context/saved-context';
 import { useTheme } from '@/hooks/use-theme';
+import { haptics } from '@/utils/haptics';
 
 const SERVICE_TYPE_LABELS: Record<string, string> = {
   food_truck: 'فود ترك',
@@ -56,7 +57,13 @@ export function BrandCard({ brand, onPress }: { brand: Brand; onPress: () => voi
               </ThemedText>
             </View>
           ) : null}
-          <Pressable style={styles.saveButton} onPress={() => toggleSaved(brand)} hitSlop={8}>
+          <Pressable
+            style={styles.saveButton}
+            onPress={() => {
+              haptics.tap();
+              toggleSaved(brand);
+            }}
+            hitSlop={8}>
             <Ionicons name={saved ? 'heart' : 'heart-outline'} size={16} color={saved ? theme.primary : '#fff'} />
           </Pressable>
         </View>

@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -9,6 +10,15 @@ import {
   TextInput,
 } from 'react-native';
 
+import {
+  authenticateWithBiometrics,
+  getBiometricLabel,
+  hasAskedToEnableBiometric,
+  isBiometricEnabled,
+  isBiometricSupported,
+  markAskedToEnableBiometric,
+  setBiometricEnabled,
+} from '@/api/biometric';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { apiErrorMessage } from '@/api/client';
@@ -17,6 +27,34 @@ import { useAuth } from '@/context/auth-context';
 import { useTheme } from '@/hooks/use-theme';
 
 type Step = 'phone' | 'otp';
+
+/** بعد أول تسجيل دخول ناجح، نعرض على المستخدم تفعيل الدخول البيومتري إن كان الجهاز يدعمه ولم يُسأل من قبل. */
+async function maybeOfferBiometricEnable() {
+  if (!(await isBiometricSupported()) || (await isBiometricEnabled()) || (await hasAskedToEnableBiometric())) {
+    return;
+  }
+  await markAskedToEnableBiometric();
+
+  const label = await getBiometricLabel();
+
+  await new Promise<void>((resolve) => {
+    Alert.alert(
+      `تفعيل الدخول بـ ${label}`,
+      `تقدر تفتح فودستيشن بسرعة باستخدام ${label} بدل رمز التحقق في كل مرة.`,
+      [
+        { text: 'ليس الآن', style: 'cancel', onPress: () => resolve() },
+        {
+          text: 'تفعيل',
+          onPress: async () => {
+            const success = await authenticateWithBiometrics(`فعّل الدخول بـ ${label}`);
+            if (success) await setBiometricEnabled(true);
+            resolve();
+          },
+        },
+      ]
+    );
+  });
+}
 
 export default function LoginScreen() {
   const theme = useTheme();
@@ -61,6 +99,7 @@ export default function LoginScreen() {
     setIsSubmitting(true);
     try {
       await verifyOtp(phone.trim(), code.trim(), needsName ? name.trim() : undefined);
+      await maybeOfferBiometricEnable();
       // نرجع للشاشة اللي جينا منها (لو وصلنا هنا بدفع فوق شاشة ثانية)، وإلا نروح للرئيسية.
       if (router.canGoBack()) {
         router.back();

@@ -1,6 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 
-import { fetchMe, logoutRequest, requestOtp as requestOtpApi, verifyOtp as verifyOtpApi } from '@/api/auth';
+import {
+  deleteAccountRequest,
+  fetchMe,
+  logoutRequest,
+  requestOtp as requestOtpApi,
+  verifyOtp as verifyOtpApi,
+} from '@/api/auth';
 import { clearToken, getToken, saveToken } from '@/api/client';
 import type { User } from '@/api/types';
 
@@ -10,6 +16,7 @@ type AuthContextValue = {
   requestOtp: (phone: string) => Promise<{ exists: boolean }>;
   verifyOtp: (phone: string, code: string, name?: string) => Promise<void>;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -50,8 +57,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const deleteAccount = useCallback(async () => {
+    await deleteAccountRequest();
+    await clearToken();
+    setUser(null);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, requestOtp, verifyOtp, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, requestOtp, verifyOtp, logout, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );

@@ -5,10 +5,12 @@ import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 
+import { cachedFetch } from '@/api/cache';
 import { getBrands, getOffers, type ServiceTypeOption } from '@/api/catalog';
 import { apiErrorMessage } from '@/api/client';
 import type { Brand, PackageOffer } from '@/api/types';
 import { BrandCard } from '@/components/brand-card';
+import { NoConnectionView } from '@/components/no-connection-view';
 import { OfferCard } from '@/components/offer-card';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -49,8 +51,10 @@ export default function HomeScreen() {
   const load = useCallback(async (serviceType?: string | null) => {
     try {
       const [brandsData, offersList] = await Promise.all([
-        getBrands(serviceType ? { service_type: serviceType } : {}),
-        getOffers(),
+        cachedFetch(`brands_${serviceType ?? 'all'}`, () =>
+          getBrands(serviceType ? { service_type: serviceType } : {})
+        ),
+        cachedFetch('offers', () => getOffers()),
       ]);
       setBrands(brandsData.brands.data);
       setServiceTypes(brandsData.serviceTypes);
@@ -87,6 +91,21 @@ export default function HomeScreen() {
     return (
       <ThemedView type="backgroundElement" style={styles.center}>
         <ActivityIndicator color={theme.primary} />
+      </ThemedView>
+    );
+  }
+
+  if (error && brands.length === 0 && offers.length === 0) {
+    return (
+      <ThemedView type="backgroundElement" style={{ flex: 1 }}>
+        <NoConnectionView
+          isRetrying={isRefreshing}
+          onRetry={async () => {
+            setIsRefreshing(true);
+            await load(activeServiceType);
+            setIsRefreshing(false);
+          }}
+        />
       </ThemedView>
     );
   }

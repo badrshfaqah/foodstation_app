@@ -99,3 +99,17 @@ export type Paginated<T> = {
   last_page: number;
   total: number;
 };
+
+export type AppNotification = {
+  id: string;
+  data: {
+    type?: string;
+    icon?: string;
+    title?: string;
+    body?: string;
+    url?: string;
+    [key: string]: unknown;
+  };
+  read_at: string | null;
+  created_at: string;
+};

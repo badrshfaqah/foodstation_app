@@ -8,6 +8,7 @@ import type { Booking, BookingStatus } from '@/api/types';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { LoginPrompt } from '@/components/login-prompt';
+import { NoConnectionView } from '@/components/no-connection-view';
 import { CardShadow } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { useTheme } from '@/hooks/use-theme';
@@ -74,6 +75,21 @@ export default function BookingsScreen() {
     return (
       <ThemedView type="backgroundElement" style={styles.center}>
         <ActivityIndicator color={theme.primary} />
+      </ThemedView>
+    );
+  }
+
+  if (error && bookings.length === 0) {
+    return (
+      <ThemedView type="backgroundElement" style={{ flex: 1 }}>
+        <NoConnectionView
+          isRetrying={isRefreshing}
+          onRetry={async () => {
+            setIsRefreshing(true);
+            await load();
+            setIsRefreshing(false);
+          }}
+        />
       </ThemedView>
     );
   }

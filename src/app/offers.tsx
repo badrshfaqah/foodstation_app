@@ -5,6 +5,7 @@ import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { getOffers } from '@/api/catalog';
 import { apiErrorMessage } from '@/api/client';
 import type { PackageOffer } from '@/api/types';
+import { NoConnectionView } from '@/components/no-connection-view';
 import { OfferCard } from '@/components/offer-card';
 import { ScreenHeader } from '@/components/screen-header';
 import { ThemedText } from '@/components/themed-text';
@@ -17,13 +18,19 @@ export default function OffersScreen() {
 
   const [offers, setOffers] = useState<PackageOffer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRetrying, setIsRetrying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const load = () =>
     getOffers()
-      .then(setOffers)
-      .catch((err) => setError(apiErrorMessage(err, 'تعذر تحميل العروض')))
-      .finally(() => setIsLoading(false));
+      .then((data) => {
+        setOffers(data);
+        setError(null);
+      })
+      .catch((err) => setError(apiErrorMessage(err, 'تعذر تحميل العروض')));
+
+  useEffect(() => {
+    load().finally(() => setIsLoading(false));
   }, []);
 
   if (isLoading) {
@@ -33,6 +40,22 @@ export default function OffersScreen() {
         <View style={styles.center}>
           <ActivityIndicator color={theme.primary} />
         </View>
+      </ThemedView>
+    );
+  }
+
+  if (error && offers.length === 0) {
+    return (
+      <ThemedView type="backgroundElement" style={styles.container}>
+        <ScreenHeader title="العروض الخاصة" />
+        <NoConnectionView
+          isRetrying={isRetrying}
+          onRetry={async () => {
+            setIsRetrying(true);
+            await load();
+            setIsRetrying(false);
+          }}
+        />
       </ThemedView>
     );
   }

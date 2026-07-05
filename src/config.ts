@@ -9,6 +9,9 @@ export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_API_URL;
 /** عنوان السيرفر بدون مسار /api، لبناء روابط الملفات المرفوعة (storage). */
 export const SERVER_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '');
 
+/** رابط سياسة الخصوصية على الموقع الرسمي (ثابت بغض النظر عن بيئة الـ API الحالية). */
+export const PRIVACY_POLICY_URL = 'https://order.foodstation.sa/privacy';
+
 const FALLBACK_COVER_IMAGE = 'https://images.unsplash.com/photo-1555244162-803834f70033?w=800&q=80';
 
 /** يحوّل مسار ملف مرفوع (من الموديل) لرابط كامل قابل للعرض، مع صورة افتراضية إذا ما فيه صورة. */

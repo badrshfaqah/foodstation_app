@@ -18,6 +18,7 @@ import { LoginPrompt } from '@/components/login-prompt';
 import { ArabicFonts, CardShadow } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { useTheme } from '@/hooks/use-theme';
+import { haptics } from '@/utils/haptics';
 
 const TOTAL_STEPS = 6;
 const STEP_LABELS = ['عدد الأشخاص', 'التاريخ', 'الوقت', 'الموقع', 'المراجعة', 'الدفع'];
@@ -155,8 +156,10 @@ export default function BookingWizardScreen() {
         notes: notes || undefined,
         payment_method: paymentMethod,
       });
+      haptics.success();
       router.replace('/(tabs)/bookings');
     } catch (err) {
+      haptics.error();
       setSubmitError(apiErrorMessage(err, 'تعذر إنشاء الحجز'));
     } finally {
       setIsSubmitting(false);
