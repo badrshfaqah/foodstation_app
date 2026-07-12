@@ -11,7 +11,7 @@ export function ScreenHeader({ title }: { title: string }) {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background, borderBottomColor: theme.backgroundSelected }]}>
-      <Pressable onPress={() => router.back()} hitSlop={8} style={styles.backButton}>
+      <Pressable onPress={() => router.back()} hitSlop={8} style={({ pressed }) => [styles.backButton, { opacity: pressed ? 0.45 : 1 }]}>
         <Ionicons name="chevron-forward" size={20} color={theme.primary} />
       </Pressable>
       <ThemedText type="smallBold" numberOfLines={1} style={styles.title}>
@@ -28,8 +28,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 8,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
+    minHeight: 48,
+    paddingVertical: 6,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   backButton: { padding: 8, width: 36, alignItems: 'center' },
   title: { flex: 1, textAlign: 'center' },

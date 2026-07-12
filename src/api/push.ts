@@ -10,6 +10,7 @@ export async function unregisterDeviceToken(token: string) {
 
 const ROUTE_PATTERNS: Array<[RegExp, (match: RegExpMatchArray) => string]> = [
   [/^\/my-bookings\/(\d+)$/, (m) => `/booking-detail/${m[1]}`],
+  [/^\/custom-quotes\/(\d+)$/, (m) => `/custom-quotes/${m[1]}`],
   [/^\/brands\/([^/]+)$/, (m) => `/brand/${m[1]}`],
 ];
 

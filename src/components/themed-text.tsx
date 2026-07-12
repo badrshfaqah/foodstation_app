@@ -47,14 +47,14 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   title: {
-    fontFamily: ArabicFonts.semiBold,
-    fontSize: 48,
-    lineHeight: 52,
+    fontFamily: ArabicFonts.bold,
+    fontSize: 30,
+    lineHeight: 40,
   },
   subtitle: {
-    fontFamily: ArabicFonts.semiBold,
-    fontSize: 32,
-    lineHeight: 44,
+    fontFamily: ArabicFonts.bold,
+    fontSize: 20,
+    lineHeight: 30,
   },
   link: {
     fontFamily: ArabicFonts.regular,

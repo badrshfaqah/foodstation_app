@@ -127,7 +127,7 @@ export default function LoginScreen() {
 
         {step === 'phone' ? (
           <TextInput
-            style={[styles.input, { color: theme.text, borderColor: theme.primary }]}
+            style={[styles.input, { color: theme.text, backgroundColor: theme.backgroundElement, borderColor: theme.backgroundSelected }]}
             placeholder="05xxxxxxxx"
             placeholderTextColor={theme.textSecondary}
             keyboardType="phone-pad"
@@ -139,7 +139,7 @@ export default function LoginScreen() {
         ) : (
           <>
             <TextInput
-              style={[styles.input, { color: theme.text, borderColor: theme.primary }]}
+              style={[styles.input, { color: theme.text, backgroundColor: theme.backgroundElement, borderColor: theme.backgroundSelected }]}
               placeholder="رمز التحقق"
               placeholderTextColor={theme.textSecondary}
               keyboardType="number-pad"
@@ -150,7 +150,7 @@ export default function LoginScreen() {
             />
             {needsName ? (
               <TextInput
-                style={[styles.input, { color: theme.text, borderColor: theme.primary }]}
+                style={[styles.input, { color: theme.text, backgroundColor: theme.backgroundElement, borderColor: theme.backgroundSelected }]}
                 placeholder="الاسم الكامل"
                 placeholderTextColor={theme.textSecondary}
                 value={name}
@@ -208,9 +208,9 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    minHeight: 52,
     fontSize: 16,
   },
   error: {
@@ -218,8 +218,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   button: {
-    borderRadius: 12,
-    paddingVertical: 14,
+    borderRadius: 14,
+    minHeight: 52,
+    justifyContent: 'center',
     alignItems: 'center',
     marginTop: 8,
   },

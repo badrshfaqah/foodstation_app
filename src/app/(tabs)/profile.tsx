@@ -14,7 +14,6 @@ import {
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { LoginPrompt } from '@/components/login-prompt';
-import { CardShadow } from '@/constants/theme';
 import { PRIVACY_POLICY_URL } from '@/config';
 import { useAuth } from '@/context/auth-context';
 import { useTheme } from '@/hooks/use-theme';
@@ -80,7 +79,7 @@ export default function ProfileScreen() {
         حسابي
       </ThemedText>
 
-      <View style={[styles.card, CardShadow, { backgroundColor: theme.background }]}>
+      <View style={[styles.card, { backgroundColor: theme.background }]}>
         <ThemedText type="smallBold">{user.name}</ThemedText>
         <ThemedText themeColor="textSecondary" type="small">
           {user.phone}
@@ -88,7 +87,7 @@ export default function ProfileScreen() {
       </View>
 
       {bioSupported ? (
-        <View style={[styles.card, CardShadow, styles.rowCard, { backgroundColor: theme.background }]}>
+        <View style={[styles.card, styles.rowCard, { backgroundColor: theme.background }]}>
           <Switch
             value={bioEnabled}
             onValueChange={toggleBiometric}
@@ -99,7 +98,7 @@ export default function ProfileScreen() {
       ) : null}
 
       <Pressable
-        style={[styles.card, CardShadow, styles.rowCard, { backgroundColor: theme.background }]}
+        style={({ pressed }) => [styles.card, styles.rowCard, { backgroundColor: theme.background, opacity: pressed ? 0.55 : 1 }]}
         onPress={() => WebBrowser.openBrowserAsync(PRIVACY_POLICY_URL)}>
         <Ionicons name="chevron-back" size={18} color={theme.textSecondary} />
         <ThemedText type="smallBold">سياسة الخصوصية</ThemedText>
@@ -126,9 +125,9 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 16, gap: 16 },
+  container: { flex: 1, paddingHorizontal: 16, paddingTop: 8, gap: 12 },
   title: { fontSize: 28, textAlign: 'right', marginTop: 8 },
-  card: { borderRadius: 16, padding: 16, gap: 4, alignItems: 'flex-end' },
+  card: { borderRadius: 14, padding: 16, gap: 4, alignItems: 'flex-end' },
   rowCard: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
   logoutButton: {
     borderWidth: 1,

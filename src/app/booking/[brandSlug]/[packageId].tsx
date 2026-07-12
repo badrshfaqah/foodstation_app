@@ -20,8 +20,8 @@ import { useAuth } from '@/context/auth-context';
 import { useTheme } from '@/hooks/use-theme';
 import { haptics } from '@/utils/haptics';
 
-const TOTAL_STEPS = 6;
-const STEP_LABELS = ['عدد الأشخاص', 'التاريخ', 'الوقت', 'الموقع', 'المراجعة', 'الدفع'];
+const TOTAL_STEPS = 7;
+const STEP_LABELS = ['عدد الأشخاص', 'التاريخ', 'الوقت', 'تخصيص الباقة', 'الموقع', 'المراجعة', 'الدفع'];
 
 const ARABIC_MONTHS = [
   'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
@@ -61,6 +61,9 @@ export default function BookingWizardScreen() {
   const [eventDate, setEventDate] = useState('');
   const [eventTime, setEventTime] = useState('');
   const [extraHours, setExtraHours] = useState(0);
+  const [selectionChoices, setSelectionChoices] = useState<Record<string, string[]>>({});
+  const [selectedAddons, setSelectedAddons] = useState<NonNullable<BookingWizardData['package']['optional_addons']>>([]);
+  const [staffGenderPreference, setStaffGenderPreference] = useState<'mixed' | 'male' | 'female'>('mixed');
   const [monthOffset, setMonthOffset] = useState(0);
   const [locationAddress, setLocationAddress] = useState('');
   const [contactPhone, setContactPhone] = useState(user?.phone ?? '');
@@ -95,7 +98,11 @@ export default function BookingWizardScreen() {
   const extraPersons = pkg ? Math.max(0, personsCount - pkg.persons_count) : 0;
   const extraPersonCost = extraPersons * (pkg?.extra_person_price ?? 0);
   const extraHourCost = extraHours * (pkg?.extra_hour_price ?? 0);
-  const totalAmount = (pkg?.price ?? 0) + extraPersonCost + extraHourCost;
+  const addonCost = selectedAddons.reduce(
+    (sum, addon) => sum + (addon.pricing === 'per_person' ? addon.price * personsCount : addon.price),
+    0
+  );
+  const totalAmount = (wizard?.pricing.effective_base_price ?? pkg?.price ?? 0) + extraPersonCost + extraHourCost + addonCost;
 
   const blockedSet = useMemo(
     () => new Set((wizard?.blockedDates ?? []).map((d) => d.date.slice(0, 10))),
@@ -123,8 +130,11 @@ export default function BookingWizardScreen() {
     if (step === 1) return personsCount >= minPersons && personsCount <= maxPersons;
     if (step === 2) return !!eventDate;
     if (step === 3) return !!eventTime;
-    if (step === 4) return !!locationAddress.trim() && !!contactPhone.trim();
-    if (step === 5) return true;
+    if (step === 4) {
+      return (pkg?.selection_groups ?? []).every((group) => (selectionChoices[group.label]?.length ?? 0) >= group.min);
+    }
+    if (step === 5) return !!locationAddress.trim() && !!contactPhone.trim();
+    if (step === 6) return true;
     return !!paymentMethod;
   };
 
@@ -155,6 +165,9 @@ export default function BookingWizardScreen() {
         contact_phone: contactPhone,
         notes: notes || undefined,
         payment_method: paymentMethod,
+        selection_choices: Object.keys(selectionChoices).length ? selectionChoices : undefined,
+        selected_addons: selectedAddons.length ? selectedAddons : undefined,
+        staff_gender_preference: (pkg?.staff_total ?? 0) > 0 ? staffGenderPreference : undefined,
       });
       haptics.success();
       router.replace('/(tabs)/bookings');
@@ -264,6 +277,19 @@ export default function BookingWizardScreen() {
         ) : null}
 
         {step === 4 ? (
+          <StepCustomize
+            pkg={pkg}
+            personsCount={personsCount}
+            selectionChoices={selectionChoices}
+            setSelectionChoices={setSelectionChoices}
+            selectedAddons={selectedAddons}
+            setSelectedAddons={setSelectedAddons}
+            staffGenderPreference={staffGenderPreference}
+            setStaffGenderPreference={setStaffGenderPreference}
+          />
+        ) : null}
+
+        {step === 5 ? (
           <StepLocation
             locationAddress={locationAddress}
             setLocationAddress={setLocationAddress}
@@ -272,7 +298,7 @@ export default function BookingWizardScreen() {
           />
         ) : null}
 
-        {step === 5 ? (
+        {step === 6 ? (
           <StepReview
             wizard={wizard}
             personsCount={personsCount}
@@ -283,13 +309,17 @@ export default function BookingWizardScreen() {
             contactPhone={contactPhone}
             extraPersonCost={extraPersonCost}
             extraHourCost={extraHourCost}
+            addonCost={addonCost}
             totalAmount={totalAmount}
+            selectionChoices={selectionChoices}
+            selectedAddons={selectedAddons}
+            staffGenderPreference={staffGenderPreference}
             notes={notes}
             setNotes={setNotes}
           />
         ) : null}
 
-        {step === 6 ? (
+        {step === 7 ? (
           <StepPayment
             paymentMethods={wizard.paymentMethods}
             paymentMethod={paymentMethod}
@@ -621,7 +651,146 @@ function StepTime({
   );
 }
 
-/* ─────────────── الخطوة 4: الموقع ─────────────── */
+/* ─────────────── الخطوة 4: تخصيص الباقة ─────────────── */
+function StepCustomize({
+  pkg,
+  personsCount,
+  selectionChoices,
+  setSelectionChoices,
+  selectedAddons,
+  setSelectedAddons,
+  staffGenderPreference,
+  setStaffGenderPreference,
+}: {
+  pkg: NonNullable<BookingWizardData['package']>;
+  personsCount: number;
+  selectionChoices: Record<string, string[]>;
+  setSelectionChoices: (choices: Record<string, string[]>) => void;
+  selectedAddons: NonNullable<BookingWizardData['package']['optional_addons']>;
+  setSelectedAddons: (addons: NonNullable<BookingWizardData['package']['optional_addons']>) => void;
+  staffGenderPreference: 'mixed' | 'male' | 'female';
+  setStaffGenderPreference: (value: 'mixed' | 'male' | 'female') => void;
+}) {
+  const theme = useTheme();
+
+  const toggleChoice = (label: string, option: string, max: number) => {
+    const current = selectionChoices[label] ?? [];
+    const next = current.includes(option)
+      ? current.filter((item) => item !== option)
+      : current.length < max
+        ? [...current, option]
+        : current;
+    setSelectionChoices({ ...selectionChoices, [label]: next });
+  };
+
+  const toggleAddon = (addon: NonNullable<BookingWizardData['package']['optional_addons']>[number]) => {
+    const selected = selectedAddons.some((item) => item.name === addon.name);
+    setSelectedAddons(selected ? selectedAddons.filter((item) => item.name !== addon.name) : [...selectedAddons, addon]);
+  };
+
+  return (
+    <View>
+      <ThemedText type="subtitle" style={styles.stepTitle}>تخصيص الباقة</ThemedText>
+      <ThemedText themeColor="textSecondary" style={styles.stepSubtitle}>
+        اختر الأصناف والإضافات المناسبة لفعاليتك
+      </ThemedText>
+
+      {(pkg.selection_groups ?? []).map((group) => {
+        const selected = selectionChoices[group.label] ?? [];
+        return (
+          <View key={group.label} style={[styles.customizationCard, { backgroundColor: theme.background }]}>
+            <ThemedText type="smallBold" style={styles.rightText}>{group.label}</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary" style={styles.rightText}>
+              اختر من {group.min} إلى {group.max} · تم اختيار {selected.length}
+            </ThemedText>
+            <View style={styles.choiceGrid}>
+              {group.options.map((option) => {
+                const active = selected.includes(option);
+                const disabled = !active && selected.length >= group.max;
+                return (
+                  <Pressable
+                    key={option}
+                    disabled={disabled}
+                    onPress={() => toggleChoice(group.label, option, group.max)}
+                    style={[
+                      styles.choiceChip,
+                      {
+                        backgroundColor: active ? theme.primaryTint : theme.backgroundElement,
+                        borderColor: active ? theme.primary : 'transparent',
+                        opacity: disabled ? 0.45 : 1,
+                      },
+                    ]}>
+                    <Ionicons name={active ? 'checkmark-circle' : 'ellipse-outline'} size={17} color={active ? theme.primary : theme.textSecondary} />
+                    <ThemedText type="small" style={{ color: active ? theme.primary : theme.text }}>{option}</ThemedText>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        );
+      })}
+
+      {(pkg.optional_addons ?? []).length > 0 ? (
+        <View style={[styles.customizationCard, { backgroundColor: theme.background }]}>
+          <ThemedText type="smallBold" style={styles.rightText}>إضافات اختيارية</ThemedText>
+          {(pkg.optional_addons ?? []).map((addon) => {
+            const active = selectedAddons.some((item) => item.name === addon.name);
+            const price = addon.pricing === 'per_person' ? addon.price * personsCount : addon.price;
+            return (
+              <Pressable key={addon.name} style={styles.addonRow} onPress={() => toggleAddon(addon)}>
+                <Ionicons name={active ? 'checkbox' : 'square-outline'} size={22} color={active ? theme.primary : theme.textSecondary} />
+                <View style={styles.addonText}>
+                  <ThemedText type="smallBold">{addon.name}</ThemedText>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    +{price} ر.س {addon.pricing === 'per_person' ? `(${addon.price} ر.س/شخص)` : ''}
+                  </ThemedText>
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+      ) : null}
+
+      {pkg.staff_total > 0 ? (
+        <View style={[styles.customizationCard, { backgroundColor: theme.background }]}>
+          <ThemedText type="smallBold" style={styles.rightText}>تفضيل طاقم الخدمة</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary" style={styles.rightText}>
+            يتضمن العرض {pkg.staff_total} من طاقم الخدمة
+          </ThemedText>
+          <View style={styles.staffOptions}>
+            {([
+              ['mixed', 'مختلط'],
+              ['male', 'رجال'],
+              ['female', 'نساء'],
+            ] as const).filter(([value]) =>
+              value === 'mixed' || (value === 'male' ? pkg.staff_male > 0 : pkg.staff_female > 0)
+            ).map(([value, label]) => {
+              const active = staffGenderPreference === value;
+              return (
+                <Pressable
+                  key={value}
+                  onPress={() => setStaffGenderPreference(value)}
+                  style={[styles.staffOption, { borderColor: active ? theme.primary : theme.backgroundSelected }]}>
+                  <Ionicons name={active ? 'radio-button-on' : 'radio-button-off'} size={18} color={active ? theme.primary : theme.textSecondary} />
+                  <ThemedText type="small">{label}</ThemedText>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+      ) : null}
+
+      {(pkg.selection_groups ?? []).length === 0 && (pkg.optional_addons ?? []).length === 0 && pkg.staff_total === 0 ? (
+        <View style={[styles.emptyCustomization, { backgroundColor: theme.background }]}>
+          <Ionicons name="checkmark-circle-outline" size={34} color={theme.success} />
+          <ThemedText type="smallBold">الباقة جاهزة بدون خيارات إضافية</ThemedText>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+/* ─────────────── الخطوة 5: الموقع ─────────────── */
 function StepLocation({
   locationAddress, setLocationAddress, contactPhone, setContactPhone,
 }: {
@@ -666,10 +835,11 @@ function StepLocation({
   );
 }
 
-/* ─────────────── الخطوة 5: المراجعة ─────────────── */
+/* ─────────────── الخطوة 6: المراجعة ─────────────── */
 function StepReview({
   wizard, personsCount, eventDate, eventTime, extraHours, locationAddress, contactPhone,
-  extraPersonCost, extraHourCost, totalAmount, notes, setNotes,
+  extraPersonCost, extraHourCost, addonCost, totalAmount, selectionChoices, selectedAddons,
+  staffGenderPreference, notes, setNotes,
 }: {
   wizard: BookingWizardData;
   personsCount: number;
@@ -680,7 +850,11 @@ function StepReview({
   contactPhone: string;
   extraPersonCost: number;
   extraHourCost: number;
+  addonCost: number;
   totalAmount: number;
+  selectionChoices: Record<string, string[]>;
+  selectedAddons: NonNullable<BookingWizardData['package']['optional_addons']>;
+  staffGenderPreference: 'mixed' | 'male' | 'female';
   notes: string;
   setNotes: (v: string) => void;
 }) {
@@ -700,12 +874,26 @@ function StepReview({
         <ReviewRow label="الوقت" value={`${eventTime} (${wizard.package.duration_hours + extraHours} ساعة)`} />
         <ReviewRow label="العنوان" value={locationAddress} />
         <ReviewRow label="رقم التواصل" value={contactPhone} />
+        {Object.entries(selectionChoices).map(([label, choices]) => (
+          <ReviewRow key={label} label={label} value={choices.join('، ')} />
+        ))}
+        {selectedAddons.length > 0 ? <ReviewRow label="الإضافات" value={selectedAddons.map((item) => item.name).join('، ')} /> : null}
+        {wizard.package.staff_total > 0 ? (
+          <ReviewRow
+            label="تفضيل الطاقم"
+            value={{ mixed: 'مختلط', male: 'رجال', female: 'نساء' }[staffGenderPreference]}
+          />
+        ) : null}
 
         <View style={[styles.reviewDivider, { backgroundColor: theme.backgroundSelected }]} />
 
-        <ReviewRow label="سعر الباقة" value={`${wizard.package.price} ر.س`} />
+        <ReviewRow label="سعر الباقة" value={`${wizard.pricing.effective_base_price} ر.س`} />
+        {wizard.pricing.discount_amount > 0 ? (
+          <ReviewRow label={wizard.pricing.offer_name ?? 'خصم العرض'} value={`-${wizard.pricing.discount_amount} ر.س`} />
+        ) : null}
         {extraPersonCost > 0 ? <ReviewRow label="أشخاص إضافيون" value={`+${extraPersonCost} ر.س`} /> : null}
         {extraHourCost > 0 ? <ReviewRow label="ساعات إضافية" value={`+${extraHourCost} ر.س`} /> : null}
+        {addonCost > 0 ? <ReviewRow label="إضافات الباقة" value={`+${addonCost} ر.س`} /> : null}
         <ReviewRow label="الإجمالي" value={`${totalAmount} ر.س`} bold />
       </View>
 
@@ -736,7 +924,7 @@ function ReviewRow({ label, value, bold }: { label: string; value: string; bold?
   );
 }
 
-/* ─────────────── الخطوة 6: الدفع ─────────────── */
+/* ─────────────── الخطوة 7: الدفع ─────────────── */
 function StepPayment({
   paymentMethods, paymentMethod, setPaymentMethod, bankInfo, totalAmount,
 }: {
@@ -854,6 +1042,15 @@ const styles = StyleSheet.create({
   stepperButtonSmall: { width: 32, height: 32, borderRadius: 16, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
   extraHoursValue: { minWidth: 24, textAlign: 'center' },
   extraHoursCost: { marginRight: 'auto' },
+
+  customizationCard: { borderRadius: 16, padding: 14, gap: 8, marginBottom: 12 },
+  choiceGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 8, marginTop: 4 },
+  choiceChip: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6, borderWidth: 1, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 8 },
+  addonRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10, paddingVertical: 8 },
+  addonText: { flex: 1, alignItems: 'flex-end' },
+  staffOptions: { flexDirection: 'row-reverse', gap: 8, marginTop: 4 },
+  staffOption: { flex: 1, flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 5, borderWidth: 1, borderRadius: 12, paddingVertical: 10 },
+  emptyCustomization: { borderRadius: 16, padding: 24, alignItems: 'center', gap: 8 },
 
   label: { textAlign: 'right', marginTop: 16, marginBottom: 6 },
   input: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 16 },

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -158,6 +158,17 @@ export default function BrandScreen() {
 
         {brand.description ? (
           <ThemedText style={styles.description}>{brand.description}</ThemedText>
+        ) : null}
+
+        {bookingAvailable ? (
+          <Pressable
+            style={[styles.quoteButton, { backgroundColor: theme.primary }]}
+            onPress={() => router.push(`/custom-quotes/create?brandSlug=${brand.slug}` as Href)}>
+            <Ionicons name="document-text-outline" size={18} color="#fff" />
+            <ThemedText type="smallBold" style={{ color: '#fff' }}>
+              أحتاج عرضًا مخصصًا لمناسبتي
+            </ThemedText>
+          </Pressable>
         ) : null}
 
         {/* معرض الصور */}
@@ -344,6 +355,7 @@ const styles = StyleSheet.create({
   statsRow: { flexDirection: 'row-reverse', gap: 10, paddingHorizontal: 16, marginTop: 16 },
   statCard: { flex: 1, borderRadius: 16, padding: 12, alignItems: 'flex-end', gap: 2 },
   description: { textAlign: 'right', marginTop: 16, marginHorizontal: 16, lineHeight: 22 },
+  quoteButton: { marginHorizontal: 16, marginTop: 18, borderRadius: 14, padding: 14, flexDirection: 'row-reverse', justifyContent: 'center', alignItems: 'center', gap: 8 },
   section: { marginTop: 16, paddingHorizontal: 16 },
   sectionTitle: { fontSize: 20, textAlign: 'right', marginBottom: 10 },
   galleryRow: { gap: 8 },

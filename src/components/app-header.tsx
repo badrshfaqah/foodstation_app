@@ -21,7 +21,7 @@ export function AppHeader({ onMenuPress }: { onMenuPress: () => void }) {
     <View
       style={[
         styles.container,
-        { paddingTop: insets.top + 10, backgroundColor: theme.background, borderBottomColor: theme.backgroundSelected },
+        { paddingTop: insets.top + 6, backgroundColor: theme.background, borderBottomColor: theme.backgroundSelected },
       ]}>
       <View style={styles.brandRow}>
         <Image source={require('@/assets/images/icon.png')} style={styles.logo} contentFit="cover" />
@@ -31,7 +31,7 @@ export function AppHeader({ onMenuPress }: { onMenuPress: () => void }) {
       </View>
       <View style={styles.actionsRow}>
         {user ? (
-          <Pressable style={styles.iconButton} onPress={() => router.push('/notifications')} hitSlop={8}>
+          <Pressable style={({ pressed }) => [styles.iconButton, { backgroundColor: theme.backgroundElement, opacity: pressed ? 0.55 : 1 }]} onPress={() => router.push('/notifications')} hitSlop={8}>
             <Ionicons name="notifications-outline" size={22} color={theme.text} />
             {unreadCount > 0 ? (
               <View style={[styles.badge, { backgroundColor: theme.primary, borderColor: theme.background }]}>
@@ -40,8 +40,8 @@ export function AppHeader({ onMenuPress }: { onMenuPress: () => void }) {
             ) : null}
           </Pressable>
         ) : null}
-        <Pressable style={styles.iconButton} onPress={onMenuPress} hitSlop={8}>
-          <Ionicons name="ellipsis-vertical" size={22} color={theme.text} />
+        <Pressable style={({ pressed }) => [styles.iconButton, { backgroundColor: theme.backgroundElement, opacity: pressed ? 0.55 : 1 }]} onPress={onMenuPress} hitSlop={8}>
+          <Ionicons name="menu-outline" size={22} color={theme.text} />
         </Pressable>
       </View>
     </View>
@@ -54,14 +54,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
+    paddingBottom: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   brandRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
   logo: { width: 30, height: 30, borderRadius: 8 },
   title: { fontSize: 20 },
   actionsRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12 },
-  iconButton: { padding: 4 },
+  iconButton: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   badge: {
     position: 'absolute',
     top: -2,

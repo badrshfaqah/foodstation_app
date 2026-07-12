@@ -2,14 +2,14 @@
   "expo": {
     "name": "فودستيشن",
     "slug": "foodstation-app",
-    "version": "1.1.0",
+    "version": "1.7.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "foodstationapp",
     "userInterfaceStyle": "automatic",
     "ios": {
       "bundleIdentifier": "sa.foodstation.app",
-      "buildNumber": "1",
+      "buildNumber": "9",
       "supportsTablet": false,
       "infoPlist": {
         "NSFaceIDUsageDescription": "نستخدم Face ID لفتح التطبيق بسرعة بدل إدخال رمز التحقق في كل مرة."
@@ -17,7 +17,7 @@
     },
     "android": {
       "package": "sa.foodstation.app",
-      "versionCode": 1,
+      "versionCode": 9,
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
         "foregroundImage": "./assets/images/android-icon-foreground.png"
@@ -40,6 +40,13 @@
       ],
       "expo-secure-store",
       "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "نحتاج الوصول إلى صورك لاختيار ورفع إيصال التحويل البنكي.",
+          "cameraPermission": false
+        }
+      ],
       [
         "expo-notifications",
         {

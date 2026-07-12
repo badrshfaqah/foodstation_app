@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { Platform, View, type ColorValue } from 'react-native';
+import { Platform, StyleSheet, type ColorValue } from 'react-native';
 
-import { CardShadow } from '@/constants/theme';
+import { ArabicFonts } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { haptics } from '@/utils/haptics';
 
@@ -17,20 +17,7 @@ function TabIcon({
   focused: boolean;
   color: ColorValue;
 }) {
-  const theme = useTheme();
-  return (
-    <View
-      style={{
-        width: 44,
-        height: 30,
-        borderRadius: 15,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: focused ? theme.primaryTint : 'transparent',
-      }}>
-      <Ionicons name={focused ? name : (`${name}-outline` as keyof typeof Ionicons.glyphMap)} color={color} size={22} />
-    </View>
-  );
+  return <Ionicons name={focused ? name : (`${name}-outline` as keyof typeof Ionicons.glyphMap)} color={color} size={24} />;
 }
 
 export default function TabsLayout() {
@@ -43,21 +30,17 @@ export default function TabsLayout() {
         tabBarActiveTintColor: theme.primary,
         tabBarInactiveTintColor: theme.textSecondary,
         tabBarShowLabel: true,
-        tabBarLabelStyle: { fontSize: 11, marginTop: 2 },
-        tabBarItemStyle: { paddingTop: 6 },
-        tabBarStyle: [
-          {
-            position: 'absolute',
-            left: 16,
-            right: 16,
-            bottom: Platform.select({ ios: 24, default: 16 }),
-            height: 64,
-            borderRadius: 24,
-            borderTopWidth: 0,
-            backgroundColor: theme.background,
-          },
-          CardShadow,
-        ],
+        tabBarLabelStyle: { fontFamily: ArabicFonts.medium, fontSize: 11 },
+        tabBarItemStyle: { paddingTop: 5 },
+        tabBarHideOnKeyboard: true,
+        tabBarStyle: {
+          height: Platform.select({ ios: 84, default: 64 }),
+          paddingTop: 4,
+          borderTopWidth: StyleSheet.hairlineWidth,
+          borderTopColor: theme.backgroundSelected,
+          backgroundColor: theme.background,
+          elevation: 0,
+        },
       }}>
       <Tabs.Screen
         name="index"

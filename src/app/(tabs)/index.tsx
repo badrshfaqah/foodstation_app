@@ -234,9 +234,9 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  listContent: { paddingHorizontal: 16, paddingBottom: 110 },
-  header: { gap: 8 },
-  sectionTitle: { fontSize: 20, textAlign: 'right', marginTop: 8, marginBottom: 8 },
+  listContent: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 24 },
+  header: { gap: 10 },
+  sectionTitle: { textAlign: 'right', marginTop: 10, marginBottom: 6 },
   offersRow: { gap: 12, paddingBottom: 8 },
   offerCardWrap: { width: 180 },
   categoriesRow: { gap: 14, paddingBottom: 8 },
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   categoryIconWrap: {
     width: 60,
     height: 60,
-    borderRadius: 18,
+    borderRadius: 16,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',

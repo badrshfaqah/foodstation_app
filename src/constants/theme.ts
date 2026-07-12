@@ -9,11 +9,11 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#111827',
-    background: '#ffffff',
-    backgroundElement: '#F3F4F5',
-    backgroundSelected: '#E7E8E9',
-    textSecondary: '#575E70',
+    text: '#171717',
+    background: '#FFFFFF',
+    backgroundElement: '#F2F2F7',
+    backgroundSelected: '#E5E5EA',
+    textSecondary: '#6C6C70',
     primary: '#E8490F',
     primaryTint: '#FFF1EC',
     accent: '#AA2F00',
@@ -22,10 +22,10 @@ export const Colors = {
   },
   dark: {
     text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    background: '#1C1C1E',
+    backgroundElement: '#000000',
+    backgroundSelected: '#2C2C2E',
+    textSecondary: '#AEAEB2',
     primary: '#FF6A34',
     primaryTint: '#3A2117',
     accent: '#FF8A5C',
@@ -52,13 +52,13 @@ export const CairoFonts = {
 
 /** أنماط ظل خفيفة للكروت، مطابقة لتصميم Figma. */
 export const CardShadow = Platform.select({
-  web: { boxShadow: '0px 1px 2px rgba(0,0,0,0.05)' },
+  web: { boxShadow: '0 1px 3px rgba(0,0,0,0.08)' },
   default: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
   },
 }) as object;
 

@@ -9,6 +9,12 @@ export type BookingWizardData = {
   weeklyOffDays: number[];
   workingHoursStart: string;
   workingHoursEnd: string;
+  pricing: {
+    base_price: number;
+    effective_base_price: number;
+    offer_name: string | null;
+    discount_amount: number;
+  };
   paymentMethods: { value: string; label: string }[];
   bankInfo: {
     bank_name: string;
@@ -42,6 +48,7 @@ export type CreateBookingPayload = {
   contact_phone: string;
   notes?: string;
   payment_method: string;
+  selection_choices?: Record<string, string[]>;
   selected_addons?: { name: string; price: number; pricing: 'fixed' | 'per_person' }[];
   staff_gender_preference?: 'mixed' | 'male' | 'female';
 };
@@ -56,6 +63,32 @@ export async function getBooking(id: number) {
   return data.booking;
 }
 
-export async function cancelBooking(id: number) {
-  await apiClient.post(`/bookings/${id}/cancel`);
+export async function cancelBooking(id: number, reason: string) {
+  await apiClient.post(`/bookings/${id}/cancel`, { reason });
+}
+
+export async function uploadBookingReceipt(id: number, asset: { uri: string; fileName?: string | null; mimeType?: string | null }) {
+  const formData = new FormData();
+  formData.append('receipt', {
+    uri: asset.uri,
+    name: asset.fileName ?? 'receipt.jpg',
+    type: asset.mimeType ?? 'image/jpeg',
+  } as unknown as Blob);
+
+  await apiClient.post(`/bookings/${id}/receipt`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+}
+
+export type ReviewPayload = {
+  service_quality: number;
+  food_quality: number;
+  punctuality: number;
+  hospitality: number;
+  comment?: string;
+};
+
+export async function submitBookingReview(id: number, payload: ReviewPayload) {
+  const { data } = await apiClient.post(`/bookings/${id}/review`, payload);
+  return data.review;
 }

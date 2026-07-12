@@ -9,7 +9,6 @@ import type { Brand } from '@/api/types';
 import { BrandCard } from '@/components/brand-card';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { CardShadow } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 export default function SearchScreen() {
@@ -48,7 +47,8 @@ export default function SearchScreen() {
   return (
     <ThemedView type="backgroundElement" style={styles.container}>
       <View style={styles.header}>
-        <View style={[styles.searchBar, CardShadow, { backgroundColor: theme.background }]}>
+        <ThemedText type="title" style={styles.title}>البحث</ThemedText>
+        <View style={[styles.searchBar, { backgroundColor: theme.backgroundSelected }]}>
           <Ionicons name="search" size={18} color={theme.textSecondary} />
           <TextInput
             style={[styles.input, { color: theme.text }]}
@@ -102,17 +102,18 @@ export default function SearchScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { padding: 16 },
+  header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, gap: 8 },
+  title: { textAlign: 'right' },
   searchBar: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
     gap: 8,
-    borderRadius: 14,
+    borderRadius: 12,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    minHeight: 44,
   },
   input: { flex: 1, fontSize: 16 },
-  listContent: { paddingHorizontal: 16, paddingBottom: 110, flexGrow: 1 },
+  listContent: { paddingHorizontal: 16, paddingBottom: 24, flexGrow: 1 },
   gridRow: { gap: 12 },
   gridItem: { flex: 1 },
   empty: { textAlign: 'center', marginTop: 48 },

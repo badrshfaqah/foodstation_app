@@ -1,4 +1,4 @@
-import { useFocusEffect, useRouter } from 'expo-router';
+import { type Href, useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 
@@ -106,6 +106,13 @@ export default function BookingsScreen() {
             <ThemedText type="title" style={styles.title}>
               حجوزاتي
             </ThemedText>
+            <Pressable
+              style={[styles.quotesButton, { borderColor: theme.primary }]}
+              onPress={() => router.push('/custom-quotes' as Href)}>
+              <ThemedText type="smallBold" themeColor="accent">
+                طلبات عروض الولائم
+              </ThemedText>
+            </Pressable>
             {error ? (
               <ThemedText themeColor="danger" style={styles.error}>
                 {error}
@@ -145,10 +152,11 @@ export default function BookingsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  listContent: { paddingHorizontal: 16, paddingBottom: 110 },
+  listContent: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 },
   title: { fontSize: 28, textAlign: 'right', marginTop: 8, marginBottom: 16 },
+  quotesButton: { alignSelf: 'flex-end', borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 9, marginBottom: 14 },
   error: { textAlign: 'center', marginBottom: 8 },
   empty: { textAlign: 'center', marginTop: 48 },
-  card: { borderRadius: 16, padding: 16, gap: 6, alignItems: 'flex-end' },
+  card: { borderRadius: 14, padding: 16, gap: 6, alignItems: 'flex-end' },
   cardHeader: { flexDirection: 'row-reverse', justifyContent: 'space-between', width: '100%' },
 });

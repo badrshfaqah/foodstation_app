@@ -30,6 +30,9 @@ export type Package = {
   includes: string[] | null;
   selection_groups: { label: string; min: number; max: number; options: string[] }[] | null;
   optional_addons: { name: string; price: number; pricing: 'fixed' | 'per_person' }[] | null;
+  staff_total: number;
+  staff_male: number;
+  staff_female: number;
   is_active: boolean;
   sort_order: number;
 };
@@ -86,9 +89,36 @@ export type Booking = {
   event_date: string;
   event_time: string;
   persons_count: number;
+  extra_hours: number;
   total_amount: number;
   payment_method: string;
+  payment_deadline: string | null;
   location_address: string;
+  contact_phone: string | null;
+  selection_choices: Record<string, string[]> | null;
+  selected_addons: { name: string; price: number; pricing: 'fixed' | 'per_person' }[] | null;
+  staff_gender_preference: 'mixed' | 'male' | 'female' | null;
+  notes: string | null;
+  rejection_reason: string | null;
+  cancellation_reason: string | null;
+  cancelled_at: string | null;
+  can_cancel: boolean;
+  can_review: boolean;
+  can_upload_receipt: boolean;
+  payment: {
+    method: string;
+    status: string;
+    receipt_uploaded: boolean;
+    rejection_reason: string | null;
+  } | null;
+  review: {
+    service_quality: number;
+    food_quality: number;
+    punctuality: number;
+    hospitality: number;
+    overall_rating: number;
+    comment: string | null;
+  } | null;
   brand?: Pick<Brand, 'id' | 'name' | 'slug' | 'logo' | 'service_type' | 'city'>;
   package?: Pick<Package, 'id' | 'name' | 'price'>;
 };
@@ -98,6 +128,39 @@ export type Paginated<T> = {
   current_page: number;
   last_page: number;
   total: number;
+};
+
+export type CustomerQuoteOffer = {
+  id: number;
+  amount: number;
+  duration_hours: number;
+  persons_count: number;
+  includes: string[] | null;
+  terms: string | null;
+  expires_at: string;
+  status: 'pending_customer' | 'accepted' | 'declined' | 'withdrawn';
+  booking_id: number | null;
+  package?: { id: number; name: string };
+};
+
+export type CustomerQuote = {
+  id: number;
+  request_number: string;
+  event_type: string;
+  event_date: string;
+  event_time: string;
+  city: string;
+  location_address: string;
+  expected_guests: number;
+  budget_min: number | null;
+  budget_max: number | null;
+  service_types: string[];
+  details: string | null;
+  contact_phone: string;
+  status: 'pending_provider' | 'offered' | 'accepted' | 'cancelled';
+  brand?: Pick<Brand, 'id' | 'name' | 'slug' | 'logo'>;
+  offer: CustomerQuoteOffer | null;
+  created_at: string | null;
 };
 
 export type AppNotification = {
