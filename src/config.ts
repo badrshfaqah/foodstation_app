@@ -1,7 +1,8 @@
 // رابط الـ API الافتراضي — عدّل هذا السطر مباشرة لتغيير أي بيئة يتصل بها التطبيق افتراضياً.
 // ملاحظة: 127.0.0.1/localhost يعمل فقط من نفس الجهاز (متصفح الويب أو محاكي iOS) — لا يعمل من جوال حقيقي
 // أو محاكي أندرويد (استخدم 10.0.2.2 للأخير، أو IP الشبكة للجهاز الحقيقي).
-const DEFAULT_API_URL = 'http://127.0.0.1:8000/api';
+// السيرفر المحلي الآن هو foodstation_native (PHP نقي، على المنفذ 8123 حسب config/config.php فيه) بدل foodstation_laravel القديم.
+const DEFAULT_API_URL = 'http://127.0.0.1:8123/api';
 
 // EXPO_PUBLIC_API_URL في ملف .env يطغى على القيمة أعلاه دون تعديل الكود (مفيد لو كل عضو فريق يشتغل على بيئة مختلفة).
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_API_URL;
