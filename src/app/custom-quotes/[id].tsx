@@ -11,6 +11,8 @@ import { ThemedView } from '@/components/themed-view';
 import { CardShadow } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
+const CITY_LABELS: Record<string, string> = { riyadh: 'الرياض', jeddah: 'جدة', dammam: 'الدمام' };
+
 export default function CustomQuoteDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -38,7 +40,7 @@ export default function CustomQuoteDetailScreen() {
           <ThemedText type="subtitle">{quote.brand?.name}</ThemedText>
           <ThemedText themeColor="textSecondary">{quote.request_number}</ThemedText>
           <ThemedText>{quote.event_type} · {quote.event_date} · {quote.event_time}</ThemedText>
-          <ThemedText>{quote.expected_guests} ضيف · {quote.city}</ThemedText>
+          <ThemedText>{quote.expected_guests} ضيف · {CITY_LABELS[quote.city] ?? quote.city}</ThemedText>
           <ThemedText>{quote.location_address}</ThemedText>
         </View>
         {offer ? <View style={[styles.card, CardShadow, { backgroundColor: theme.background }]}>

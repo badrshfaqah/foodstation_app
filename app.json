@@ -2,14 +2,14 @@
   "expo": {
     "name": "فودستيشن",
     "slug": "foodstation-app",
-    "version": "1.7.0",
+    "version": "1.8.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "foodstationapp",
     "userInterfaceStyle": "automatic",
     "ios": {
       "bundleIdentifier": "sa.foodstation.app",
-      "buildNumber": "9",
+      "buildNumber": "10",
       "supportsTablet": false,
       "infoPlist": {
         "NSFaceIDUsageDescription": "نستخدم Face ID لفتح التطبيق بسرعة بدل إدخال رمز التحقق في كل مرة."
@@ -17,7 +17,7 @@
     },
     "android": {
       "package": "sa.foodstation.app",
-      "versionCode": 9,
+      "versionCode": 10,
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
         "foregroundImage": "./assets/images/android-icon-foreground.png"
